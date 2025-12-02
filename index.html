@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>words in my heart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #ffe4ec, #ffafc9, #ff7b9c);
+      color: #41202a;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* ---------------- LOCK SCREEN ---------------- */
+    #lock-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      z-index: 999;
+    }
+
+    .lock-card {
+      background: rgba(255, 250, 252, 0.95);
+      padding: 28px 26px;
+      border-radius: 18px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+
+    .lock-card h2 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: #c01852;
+    }
+
+    .lock-card p {
+      font-size: 0.9rem;
+      color: #7a3b4d;
+      margin-bottom: 18px;
+    }
+
+    .lock-icon {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .lock-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid #f7b0c5;
+      outline: none;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .lock-button {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 0;
+      background: linear-gradient(135deg, #ff4f7a, #ff7fa3);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      box-shadow: 0 8px 18px rgba(255, 79, 122, 0.4);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .lock-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(255, 79, 122, 0.4);
+    }
+
+    .lock-error {
+      font-size: 0.8rem;
+      color: #d0203b;
+      min-height: 16px;
+      margin-top: 6px;
+    }
+
+    .shake {
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-4px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* --------------- MAIN PAGE (MAILBOX) --------------- */
+    .container {
+      text-align: center;
+      display: none; /* hidden until password correct */
+    }
+
+    .title {
+      font-size: 2.3rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      color: #fff5f8;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #ffe9f1;
+      margin-bottom: 2rem;
+    }
+
+    .mailbox-wrapper {
+      width: 500px;
+      height: 380px;
+      position: relative;
+      cursor: pointer;
+      perspective: 1400px;
+      margin: 0 auto;
+    }
+
+    .mailbox {
+      width: 100%;
+      height: 100%;
+      background: #ff4f72;
+      border-radius: 40px 40px 20px 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+      position: relative;
+      animation: float 3s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .mailbox-lid {
+      width: 100%;
+      height: 55%;
+      background: #ff7690;
+      border-radius: 40px 40px 0 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: top center;
+      transition: 0.9s ease;
+      z-index: 5;
+    }
+
+    .mailbox.opened .mailbox-lid {
+      transform: rotateX(120deg);
+    }
+
+    .letter {
+      width: 70%;
+      height: 72%;
+      background: #fffdf9;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80%);
+      opacity: 0;
+      transition: 0.9s ease;
+      padding: 22px;
+      overflow-y: auto;
+    }
+
+    .mailbox.opened .letter {
+      transform: translateX(-50%) translateY(-10%);
+      opacity: 1;
+      z-index: 10;
+    }
+
+    .letter-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: #9b6a76;
+      font-size: 0.9rem;
+    }
+
+    .heart-seal {
+      width: 32px;
+      height: 32px;
+      background: radial-gradient(circle at 30% 30%, #ffe2ef, #ff477e);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: white;
+    }
+
+    .letter-content {
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.45rem;
+      color: #5a2a3a;
+      font-size: 0.95rem;
+    }
+
+    .letter-footer {
+      margin-top: 15px;
+      text-align: right;
+      color: #b46b7c;
+      font-style: italic;
+      font-size: 1rem;
+    }
+
+    .floating-hearts span {
+      position: absolute;
+      font-size: 1.6rem;
+      animation: heartFloat 6s linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes heartFloat {
+      0% { transform: translateY(0); opacity: 0; }
+      20% { opacity: 1; }
+      100% { transform: translateY(-200px); opacity: 0; }
+    }
+
+    .floating-hearts span:nth-child(1) { left: 15%; animation-delay: 0s; }
+    .floating-hearts span:nth-child(2) { left: 35%; animation-delay: 1s; }
+    .floating-hearts span:nth-child(3) { left: 55%; animation-delay: 2s; }
+    .floating-hearts span:nth-child(4) { left: 75%; animation-delay: 3s; }
+
+    .flower-ring span {
+      position: absolute;
+      font-size: 2rem;
+      animation: flowerDance 4s infinite ease-in-out;
+    }
+
+    @keyframes flowerDance {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(10deg) scale(1.15); }
+    }
+
+    .flower-ring span:nth-child(1) { top: -20px; left: 20px; }
+    .flower-ring span:nth-child(2) { top: -15px; right: 25px; }
+    .flower-ring span:nth-child(3) { bottom: -15px; left: 40px; }
+    .flower-ring span:nth-child(4) { bottom: -20px; right: 40px; }
+
+    .click-heart {
+      position: fixed;
+      font-size: 1.8rem;
+      pointer-events: none;
+      animation: burst 0.8s forwards ease-out;
+      z-index: 999;
+    }
+
+    @keyframes burst {
+      0% { transform: scale(0.3); opacity: 1; }
+      70% { transform: scale(1.4) translateY(-20px); opacity: 1; }
+      100% { transform: scale(1.5) translateY(-40px); opacity: 0; }
+    }
+
+    .tap-text {
+      color: white;
+      margin-top: 15px;
+      opacity: 0.8;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+
+    @media (max-width: 480px) {
+      .mailbox-wrapper {
+        width: 330px;
+        height: 280px;
+      }
+      .title {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 🔐 LOCK SCREEN -->
+  <div id="lock-screen">
+    <div class="lock-card" id="lock-card">
+      <div class="lock-icon">🔒</div>
+      <h2>Private Letter</h2>
+      <p>Enter the secret key to unlock what’s in my heart.</p>
+      <input
+        type="password"
+        id="password-input"
+        class="lock-input"
+        placeholder="Enter password"
+      />
+      <button class="lock-button" id="unlock-btn">Unlock 💌</button>
+      <div class="lock-error" id="lock-error"></div>
+    </div>
+  </div>
+
+  <!-- 💌 MAIN CONTENT (HIDDEN UNTIL PASSWORD IS CORRECT) -->
+  <div class="container" id="main-content">
+    <h1 class="title">A Letter for You Keerthi 💖</h1>
+    <p class="subtitle">Click the mailbox 💌</p>
+
+    <div class="mailbox-wrapper">
+      <div class="mailbox" id="mailbox">
+
+        <div class="mailbox-lid"></div>
+
+        <div class="floating-hearts">
+          <span>♥</span>
+          <span>♡</span>
+          <span>♥</span>
+          <span>♡</span>
+        </div>
+
+        <div class="flower-ring">
+          <span>🌸</span>
+          <span>🌺</span>
+          <span>🌼</span>
+          <span>🌷</span>
+        </div>
+
+        <div class="letter">
+          <div class="letter-header">
+            <div>To: <strong>My Special Person</strong></div>
+            <div class="heart-seal">♥</div>
+          </div>
+
+          <div class="letter-content">
+            <p>
+              Hey Keerthi,<br><br>
+
+              There’s something special I want to tell you, and I felt a letter would say it better than messages.
+              <br><br>
+
+              After I joined RIT Chennai, one random Instagram request came to me. I honestly thought it was fake at first. But after some days, my friends told me it was actually a real person—you. Then I saw you in college, AIML “A” section, same department. I never expected that one simple request would slowly change my life.
+              <br><br>
+
+              When we started talking, I wasn’t interested in love in the first semester. But as days passed, the more I talked to you, the more I changed. Your way of speaking, your small jokes, the way you understand me—it all slowly made a place in my heart.
+              <br><br>
+
+              Somewhere I felt you also had interest in me… like the day you said, “You know the question and the answer,” and “Four years will go fast.” Those words didn’t leave my mind.
+              <br><br>
+
+              And then came the day I can never forget—June 16, our M2 end semester exam.The first time we met properly. When I shook your hand and wished you an advance happy birthday, it actually made me feel something new… something good.
+
+              <br><br>
+
+              Another day, during the break time from 10:00 to 10:30, we had ice cream together. It might sound simple, but that small moment felt so special to me. Spending that time with you made me realise how comfortable and happy I feel when you’re around.On another different day, I did your project for you. When I came to explain it, I was really nervous. And then you quietly kept chocolates in my bag and ran to your class… that moment hit differently. I still smile thinking about it.I don’t even know how I got the courage to suddenly come to your class, ask sir for permission, call you out in front of everyone, and give you a chocolate. I’m not usually that bold… but for you, it happened naturally.And the last period that same day—you were explaining your project to ma’am, it showed an error, and you turned back and looked at me. That look… it’s still in my eyes. I really can’t forget it. That entire day I was so happy because of you. You made my day more than special.
+
+              <br><br>
+              Now you’ve become my favourite person.  
+              My daily chat, my comfort, my smile.
+              <br><br>
+              I like you… truly. And I think you feel something too.  
+              I just wanted you to know what’s in my heart 💌.
+            </p>
+          </div>
+
+          <div class="letter-footer">
+            With all my love,<br>
+            <strong>Harish Raja</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tap-text">Tap to open 💖</div>
+  </div>
+
+  <script>
+    // ---------- PASSWORD LOCK ----------
+    const PASSWORD = "ki0706";  // 🔑 change this if you want
+
+    const lockScreen = document.getElementById("lock-screen");
+    const mainContent = document.getElementById("main-content");
+    const passwordInput = document.getElementById("password-input");
+    const unlockBtn = document.getElementById("unlock-btn");
+    const lockError = document.getElementById("lock-error");
+    const lockCard = document.getElementById("lock-card");
+
+    function tryUnlock() {
+      const val = passwordInput.value.trim();
+      if (val === PASSWORD) {
+        lockScreen.style.display = "none";
+        mainContent.style.display = "block";
+      } else {
+        lockError.textContent = "Wrong password, try again 💔";
+        lockCard.classList.remove("shake");
+        // trigger reflow
+        void lockCard.offsetWidth;
+        lockCard.classList.add("shake");
+      }
+    }
+
+    unlockBtn.addEventListener("click", tryUnlock);
+
+    passwordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        tryUnlock();
+      }
+    });
+
+    // ---------- MAILBOX CLICK ----------
+    const mailbox = document.getElementById("mailbox");
+
+    mailbox.addEventListener("click", (event) => {
+      mailbox.classList.add("opened");
+
+      const heart = document.createElement("div");
+      heart.classList.add("click-heart");
+      heart.textContent = "💖";
+      heart.style.left = event.clientX + "px";
+      heart.style.top = event.clientY + "px";
+      document.body.appendChild(heart);
+
+      setTimeout(() => heart.remove(), 800);
+    });
+  </script>
+</body>
+</html>
